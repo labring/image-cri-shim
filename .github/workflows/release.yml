@@ -31,5 +31,5 @@ jobs:
           version: latest
           args: release --timeout=1h
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.prepare.outputs.tag_name }}
