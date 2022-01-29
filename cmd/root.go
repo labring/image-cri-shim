@@ -30,7 +30,7 @@ import (
 	"syscall"
 )
 
-var shimSocket, criSocket, registryAddr string
+var shimSocket, criSocket string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -46,7 +46,7 @@ var rootCmd = &cobra.Command{
 		if shimSocket == "" {
 			return errors.New("socket path is empty")
 		}
-		if registryAddr == "" {
+		if server.SealosHub == "" {
 			return errors.New("registry addr is empty")
 		}
 		if criSocket == "" {
