@@ -56,8 +56,18 @@ var rootCmd = &cobra.Command{
 			}
 			criSocket = socket
 		}
+		if !isExist(criSocket) {
+			return errors.New("cri is running?")
+		}
 		return nil
 	},
+}
+
+func isExist(fileName string) bool {
+	if _, err := os.Stat(fileName); err != nil {
+		return os.IsExist(err)
+	}
+	return true
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -80,7 +90,7 @@ func run(socket string, criSocket string) {
 		ShimSocket:  socket,
 		ImageSocket: criSocket,
 	}
-
+	klog.Infof("socket info shim: %v ,image: %v, registry: %v", socket, criSocket, server.SealosHub)
 	_shim, err := shim.NewShim(options)
 	if err != nil {
 		klog.Fatalf("failed to new _shim, %s", err)
@@ -88,12 +98,12 @@ func run(socket string, criSocket string) {
 
 	err = _shim.Setup()
 	if err != nil {
-		klog.Fatalf("failed to setup sealer _shim, %s", err)
+		klog.Fatalf("failed to setup sealos _shim, %s", err)
 	}
 
 	err = _shim.Start()
 	if err != nil {
-		klog.Fatalf(fmt.Sprintf("failed to start sealer _shim, %s", err))
+		klog.Fatalf(fmt.Sprintf("failed to start sealos _shim, %s", err))
 	}
 
 	signalCh := make(chan os.Signal, 1)
@@ -106,5 +116,6 @@ func run(socket string, criSocket string) {
 	case <-stopCh:
 
 	}
-	klog.Infof("Shutting donw the sealer _shim")
+	_ = os.Remove(socket)
+	klog.Infof("Shutting down the sealos _shim")
 }
