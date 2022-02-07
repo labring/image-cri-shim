@@ -17,7 +17,9 @@ const (
 
 func (s *server) ListImages(ctx context.Context,
 	req *api.ListImagesRequest) (*api.ListImagesResponse, error) {
-	req.Filter.Image.Image = s.replaceImage(req.Filter.Image.Image, "ListImages")
+	if req.Filter != nil && req.Filter.Image != nil {
+		req.Filter.Image.Image = s.replaceImage(req.Filter.Image.Image, "ListImages")
+	}
 
 	rsp, err := (*s.imageService).ListImages(ctx, req)
 
@@ -30,8 +32,9 @@ func (s *server) ListImages(ctx context.Context,
 
 func (s *server) ImageStatus(ctx context.Context,
 	req *api.ImageStatusRequest) (*api.ImageStatusResponse, error) {
-
-	req.Image.Image = s.replaceImage(req.Image.Image, "ImageStatus")
+	if req.Image != nil {
+		req.Image.Image = s.replaceImage(req.Image.Image, "ImageStatus")
+	}
 	rsp, err := (*s.imageService).ImageStatus(ctx, req)
 
 	if err != nil {
@@ -43,7 +46,9 @@ func (s *server) ImageStatus(ctx context.Context,
 
 func (s *server) PullImage(ctx context.Context,
 	req *api.PullImageRequest) (*api.PullImageResponse, error) {
-	req.Image.Image = s.replaceImage(req.Image.Image, "PullImage")
+	if req.Image != nil {
+		req.Image.Image = s.replaceImage(req.Image.Image, "PullImage")
+	}
 	rsp, err := (*s.imageService).PullImage(ctx, req)
 
 	if err != nil {
@@ -55,7 +60,9 @@ func (s *server) PullImage(ctx context.Context,
 
 func (s *server) RemoveImage(ctx context.Context,
 	req *api.RemoveImageRequest) (*api.RemoveImageResponse, error) {
-	req.Image.Image = s.replaceImage(req.Image.Image, "RemoveImage")
+	if req.Image != nil {
+		req.Image.Image = s.replaceImage(req.Image.Image, "RemoveImage")
+	}
 	rsp, err := (*s.imageService).RemoveImage(ctx, req)
 
 	if err != nil {
