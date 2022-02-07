@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"fmt"
+	"k8s.io/klog/v2"
 	"strings"
 
 	api "k8s.io/cri-api/pkg/apis/runtime/v1alpha2"
@@ -13,7 +13,6 @@ const (
 	defaultDomain       = "docker.io"
 	officialRepoName    = "library"
 	defaultTag          = "latest"
-
 )
 
 func (s *server) ListImages(ctx context.Context,
@@ -48,10 +47,10 @@ func (s *server) PullImage(ctx context.Context,
 	// but kubelet sometimes will invoke imageService.RemoveImage() or something else. The req.Image.Image will the original name.
 	// so we'd better tag "sealer.hub/library/nginx:1.1.1" with original name "req.Image.Image" After "rsp, err := (*s.imageService).PullImage(ctx, req)".
 	domain, named := splitDockerDomain(req.Image.Image)
-	if domain == "" {
+	if domain != "" {
 		req.Image.Image = SealosHub + "/" + named
 	}
-	fmt.Println(req.Image.Image)
+	klog.Infof("pulling image name is: %s", req.Image.Image)
 	rsp, err := (*s.imageService).PullImage(ctx, req)
 
 	if err != nil {

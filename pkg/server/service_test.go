@@ -19,7 +19,7 @@ package server
 import "testing"
 
 func Test_splitDockerDomain(t *testing.T) {
-	a,b:=splitDockerDomain("nginx:2.7")
+	a, b := splitDockerDomain("nginx:1.14.2")
 	println(a)
 	println(b)
 }
