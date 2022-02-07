@@ -2,10 +2,9 @@ package server
 
 import (
 	"context"
+	api "k8s.io/cri-api/pkg/apis/runtime/v1alpha2"
 	"k8s.io/klog/v2"
 	"strings"
-
-	api "k8s.io/cri-api/pkg/apis/runtime/v1alpha2"
 )
 
 const (
@@ -17,9 +16,6 @@ const (
 
 func (s *server) ListImages(ctx context.Context,
 	req *api.ListImagesRequest) (*api.ListImagesResponse, error) {
-	if req.Filter != nil && req.Filter.Image != nil {
-		req.Filter.Image.Image = s.replaceImage(req.Filter.Image.Image, "ListImages")
-	}
 
 	rsp, err := (*s.imageService).ListImages(ctx, req)
 
@@ -60,9 +56,6 @@ func (s *server) PullImage(ctx context.Context,
 
 func (s *server) RemoveImage(ctx context.Context,
 	req *api.RemoveImageRequest) (*api.RemoveImageResponse, error) {
-	if req.Image != nil {
-		req.Image.Image = s.replaceImage(req.Image.Image, "RemoveImage")
-	}
 	rsp, err := (*s.imageService).RemoveImage(ctx, req)
 
 	if err != nil {

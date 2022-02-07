@@ -19,7 +19,8 @@ package server
 import "testing"
 
 func Test_splitDockerDomain(t *testing.T) {
-	a, b := splitDockerDomain("nginx:1.14.2")
-	println(a)
-	println(b)
+	//a, b := splitDockerDomain("8f1e66e40394")
+
+	//println(a)
+	println(matchImageTagOrSHA("8f1e66e40394"))
 }
