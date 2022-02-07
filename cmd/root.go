@@ -87,6 +87,7 @@ func init() {
 	rootCmd.Flags().StringVar(&criSocket, "cri-socket", "", "The endpoint of remote image socket path.")
 	rootCmd.Flags().StringVar(&server.SealosHub, "registry-address", server.SealosHub, "The registry address.")
 	rootCmd.Flags().BoolVar(&force, "force", false, "is force.")
+	rootCmd.Flags().BoolVar(&server.Debug, "debug", server.Debug, "output debug log")
 
 }
 

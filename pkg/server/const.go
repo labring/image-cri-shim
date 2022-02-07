@@ -8,3 +8,4 @@ const (
 )
 
 var SealosHub = "sealos.hub:5000"
+var Debug = false

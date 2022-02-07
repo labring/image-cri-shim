@@ -83,12 +83,15 @@ func (s *server) replaceImage(image, action string) string {
 	// note:
 	// but kubelet sometimes will invoke imageService.RemoveImage() or something else. The req.Image.Image will the original name.
 	// so we'd better tag "sealer.hub/library/nginx:1.1.1" with original name "req.Image.Image" After "rsp, err := (*s.imageService).PullImage(ctx, req)".
+	fixImageName := image
 	domain, named := splitDockerDomain(image)
 	if domain != "" {
-		image = SealosHub + "/" + named
+		fixImageName = SealosHub + "/" + named
 	}
-	klog.Infof("image name is: %s , action: %s", image, action)
-	return image
+	if Debug {
+		klog.Infof("begin image: %s ,after image: %s , action: %s", image, fixImageName, action)
+	}
+	return fixImageName
 }
 func splitDockerDomain(name string) (domain, remainder string) {
 	i := strings.IndexRune(name, '/')
