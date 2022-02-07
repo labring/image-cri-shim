@@ -31,6 +31,7 @@ import (
 )
 
 var shimSocket, criSocket string
+var force bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -56,8 +57,10 @@ var rootCmd = &cobra.Command{
 			}
 			criSocket = socket
 		}
-		if !isExist(criSocket) {
-			return errors.New("cri is running?")
+		if !force {
+			if !isExist(criSocket) {
+				return errors.New("cri is running?")
+			}
 		}
 		return nil
 	},
@@ -83,6 +86,8 @@ func init() {
 	rootCmd.Flags().StringVar(&shimSocket, "shim-socket", server.SealosShimSock, "The endpoint of local image socket path.")
 	rootCmd.Flags().StringVar(&criSocket, "cri-socket", "", "The endpoint of remote image socket path.")
 	rootCmd.Flags().StringVar(&server.SealosHub, "registry-address", server.SealosHub, "The registry address.")
+	rootCmd.Flags().BoolVar(&force, "force", false, "is force.")
+
 }
 
 func run(socket string, criSocket string) {
