@@ -1,5 +1,5 @@
 /*
-Copyright 2022 cuisongliu@qq.com.
+Copyright 2021 cuisongliu@qq.com.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package server
+package utils
 
-import "testing"
+func NotIn(key string, slice []string) bool {
+	for _, s := range slice {
+		if key == s {
+			return false
+		}
+	}
+	return true
+}
 
-func Test_splitDockerDomain(t *testing.T) {
-	//a, b := splitDockerDomain("8f1e66e40394")
-
-	//println(a)
+func InList(key string, slice []string) bool {
+	return !NotIn(key, slice)
 }

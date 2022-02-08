@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/sealyun-market/sealos-cri-shim/pkg/utils"
 	api "k8s.io/cri-api/pkg/apis/runtime/v1alpha2"
 	"k8s.io/klog/v2"
 	"strings"
@@ -86,7 +87,9 @@ func (s *server) replaceImage(image, action string) string {
 	fixImageName := image
 	domain, named := splitDockerDomain(image)
 	if domain != "" {
-		fixImageName = SealosHub + "/" + named
+		if len(IgnoreHub) > 0 && utils.NotIn(domain, IgnoreHub) || len(IgnoreHub) == 0 {
+			fixImageName = SealosHub + "/" + named
+		}
 	}
 	if Debug {
 		klog.Infof("begin image: %s ,after image: %s , action: %s", image, fixImageName, action)
