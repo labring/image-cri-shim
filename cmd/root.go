@@ -19,10 +19,10 @@ package cmd
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/sealyun-market/sealos-cri-shim/pkg/cri"
-	"github.com/sealyun-market/sealos-cri-shim/pkg/server"
-	"github.com/sealyun-market/sealos-cri-shim/pkg/shim"
-	"github.com/sealyun-market/sealos-cri-shim/pkg/version"
+	"github.com/sealyun-market/image-cri-shim/pkg/cri"
+	"github.com/sealyun-market/image-cri-shim/pkg/server"
+	"github.com/sealyun-market/image-cri-shim/pkg/shim"
+	"github.com/sealyun-market/image-cri-shim/pkg/version"
 	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
 	"os"
@@ -35,7 +35,7 @@ var force bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "sealos-cri-shim",
+	Use:   "image-cri-shim",
 	Short: "cri for kubelet endpoint-image-service",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
@@ -85,7 +85,7 @@ func Execute() {
 func init() {
 	rootCmd.Flags().StringVar(&shimSocket, "shim-socket", server.SealosShimSock, "The endpoint of local image socket path.")
 	rootCmd.Flags().StringVar(&criSocket, "cri-socket", "", "The endpoint of remote image socket path.")
-	rootCmd.Flags().StringVar(&server.SealosHub, "registry-address", server.SealosHub, "The registry address.")
+	rootCmd.Flags().StringVar(&server.SealosHub, "registry-address", "", "The registry address.")
 	rootCmd.Flags().StringSliceVar(&server.IgnoreHub, "ignore-registry-address", server.IgnoreHub, "The ignore registry address.")
 
 	rootCmd.Flags().BoolVar(&force, "force", false, "is force.")

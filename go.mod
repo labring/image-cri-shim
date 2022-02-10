@@ -1,4 +1,4 @@
-module github.com/sealyun-market/sealos-cri-shim
+module github.com/sealyun-market/image-cri-shim
 
 go 1.16
 

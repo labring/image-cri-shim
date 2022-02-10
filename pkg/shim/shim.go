@@ -16,8 +16,8 @@ package shim
 
 import (
 	"fmt"
-	"github.com/sealyun-market/sealos-cri-shim/pkg/server"
-	"github.com/sealyun-market/sealos-cri-shim/pkg/shim/client"
+	"github.com/sealyun-market/image-cri-shim/pkg/server"
+	"github.com/sealyun-market/image-cri-shim/pkg/shim/client"
 	"k8s.io/klog/v2"
 	"os"
 	"sync"

@@ -1,4 +1,4 @@
-# sealos-cri-shim
+# image-cri-shim
 
 sealos hack cri socket
 

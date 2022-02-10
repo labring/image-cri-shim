@@ -16,7 +16,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/sealyun-market/sealos-cri-shim/pkg/utils"
+	"github.com/sealyun-market/image-cri-shim/pkg/utils"
 	"google.golang.org/grpc"
 	k8sapi "k8s.io/cri-api/pkg/apis/runtime/v1alpha2"
 	"k8s.io/klog/v2"

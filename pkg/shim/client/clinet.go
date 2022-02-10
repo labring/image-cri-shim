@@ -16,7 +16,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/sealyun-market/sealos-cri-shim/pkg/utils"
+	"github.com/sealyun-market/image-cri-shim/pkg/utils"
 	"net"
 	"os"
 	"syscall"
@@ -26,7 +26,6 @@ import (
 	"google.golang.org/grpc/connectivity"
 
 	api "k8s.io/cri-api/pkg/apis/runtime/v1alpha2"
-
 )
 
 // DialNotifyFn is a function to call after a successful net.Dial[Timeout]().
