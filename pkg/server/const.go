@@ -7,6 +7,6 @@ const (
 	DirPermissions = 0711
 )
 
-var SealosHub = "sealos.hub:5000"
+var SealosHub = ""
 var IgnoreHub []string
 var Debug = false

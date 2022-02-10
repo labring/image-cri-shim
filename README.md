@@ -1,6 +1,6 @@
 # image-cri-shim
 
-sealos hack cri socket
+image hack cri socket
 
 ## kubelet add post shell
 

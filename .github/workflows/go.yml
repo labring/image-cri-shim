@@ -35,10 +35,10 @@ jobs:
       - name: Save build binaries linux-amd64
         uses: actions/upload-artifact@v2
         with:
-          name: sealos-amd64
+          name: image-amd64
           path: dist/image-cri-shim_linux_amd64/image-cri-shim
       - name: Save build binaries linux-arm64
         uses: actions/upload-artifact@v2
         with:
-          name: sealos-arm64
+          name: image-arm64
           path: dist/image-cri-shim_linux_arm64/image-cri-shim

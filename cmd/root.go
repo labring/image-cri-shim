@@ -106,12 +106,12 @@ func run(socket string, criSocket string) {
 
 	err = _shim.Setup()
 	if err != nil {
-		klog.Fatalf("failed to setup sealos _shim, %s", err)
+		klog.Fatalf("failed to setup image _shim, %s", err)
 	}
 
 	err = _shim.Start()
 	if err != nil {
-		klog.Fatalf(fmt.Sprintf("failed to start sealos _shim, %s", err))
+		klog.Fatalf(fmt.Sprintf("failed to start image _shim, %s", err))
 	}
 
 	signalCh := make(chan os.Signal, 1)
@@ -125,5 +125,5 @@ func run(socket string, criSocket string) {
 
 	}
 	_ = os.Remove(socket)
-	klog.Infof("Shutting down the sealos _shim")
+	klog.Infof("Shutting down the image _shim")
 }
