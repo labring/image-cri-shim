@@ -48,7 +48,7 @@ var rootCmd = &cobra.Command{
 			return errors.New("socket path is empty")
 		}
 		if server.SealosHub == "" {
-			return errors.New("registry addr is empty")
+			klog.Warning("registry addr is empty")
 		}
 		if criSocket == "" {
 			socket, err := cri.DetectCRISocket()

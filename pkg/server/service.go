@@ -86,11 +86,14 @@ func (s *server) replaceImage(image, action string) string {
 	// so we'd better tag "sealer.hub/library/nginx:1.1.1" with original name "req.Image.Image" After "rsp, err := (*s.imageService).PullImage(ctx, req)".
 	fixImageName := image
 	domain, named := splitDockerDomain(image)
-	if domain != "" {
-		if len(IgnoreHub) > 0 && utils.NotIn(domain, IgnoreHub) || len(IgnoreHub) == 0 {
-			fixImageName = SealosHub + "/" + named
+	if SealosHub != "" {
+		if domain != "" {
+			if len(IgnoreHub) > 0 && utils.NotIn(domain, IgnoreHub) || len(IgnoreHub) == 0 {
+				fixImageName = SealosHub + "/" + named
+			}
 		}
 	}
+
 	if Debug {
 		klog.Infof("begin image: %s ,after image: %s , action: %s", image, fixImageName, action)
 	}
