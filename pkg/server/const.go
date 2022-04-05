@@ -8,5 +8,5 @@ const (
 )
 
 var SealosHub = ""
-var IgnoreHub []string
+var ShimImages []string
 var Debug = false

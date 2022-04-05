@@ -16,6 +16,17 @@ limitations under the License.
 
 package utils
 
+import (
+	"bufio"
+	"errors"
+	"fmt"
+	"gopkg.in/yaml.v3"
+	"io"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+)
+
 func NotIn(key string, slice []string) bool {
 	for _, s := range slice {
 		if key == s {
@@ -27,4 +38,94 @@ func NotIn(key string, slice []string) bool {
 
 func InList(key string, slice []string) bool {
 	return !NotIn(key, slice)
+}
+
+func Unmarshal(path string) (map[string]interface{}, error) {
+	metadata, err := ReadAll(path)
+	if err != nil {
+		return nil, err
+	}
+	var data map[string]interface{}
+	err = yaml.Unmarshal(metadata, &data)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// ReadAll read file content
+func ReadAll(fileName string) ([]byte, error) {
+	// step1：check file exist
+	if !IsExist(fileName) {
+		return nil, fmt.Errorf("path is %s no such file", fileName)
+	}
+	// step2：open file
+	file, err := os.Open(filepath.Clean(fileName))
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	// step3：read file content
+	content, err := ioutil.ReadFile(filepath.Clean(fileName))
+	if err != nil {
+		return nil, err
+	}
+
+	return content, nil
+}
+
+func IsExist(fileName string) bool {
+	if _, err := os.Stat(fileName); err != nil {
+		return os.IsExist(err)
+	}
+	return true
+}
+
+func GetFiles(path string) (paths []string, err error) {
+	_, err = os.Stat(path)
+	if err != nil {
+		return
+	}
+	err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		paths = append(paths, path)
+		return err
+	})
+	return paths, err
+}
+
+func ReadLines(fileName string) ([]string, error) {
+	var lines []string
+	if !IsExist(fileName) {
+		return nil, errors.New("no such file for by read lines")
+	}
+	file, err := os.Open(filepath.Clean(fileName))
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	br := bufio.NewReader(file)
+	for {
+		line, _, c := br.ReadLine()
+		if c == io.EOF {
+			break
+		}
+		lines = append(lines, string(line))
+	}
+	return lines, nil
+}
+
+func RemoveDuplicate(list []string) []string {
+	var result []string
+	flagMap := map[string]struct{}{}
+	for _, v := range list {
+		if _, ok := flagMap[v]; !ok {
+			flagMap[v] = struct{}{}
+			result = append(result, v)
+		}
+	}
+	return result
 }

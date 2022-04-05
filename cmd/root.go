@@ -22,8 +22,10 @@ import (
 	"github.com/sealyun-market/image-cri-shim/pkg/cri"
 	"github.com/sealyun-market/image-cri-shim/pkg/server"
 	"github.com/sealyun-market/image-cri-shim/pkg/shim"
+	"github.com/sealyun-market/image-cri-shim/pkg/utils"
 	"github.com/sealyun-market/image-cri-shim/pkg/version"
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 	"os"
 	"os/signal"
@@ -32,6 +34,16 @@ import (
 
 var shimSocket, criSocket string
 var force bool
+var configFile string
+
+type Config struct {
+	Shim    string
+	CRI     string
+	Address string
+	Images  []string
+	Force   bool
+	Debug   bool
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -44,9 +56,37 @@ var rootCmd = &cobra.Command{
 		run(shimSocket, criSocket)
 	},
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		if shimSocket == "" {
-			return errors.New("socket path is empty")
+		data, err := utils.Unmarshal(configFile)
+		if err != nil {
+			return errors.Wrap(err, "image shim config load error")
 		}
+		shimSocket, _, _ = unstructured.NestedString(data, "shim")
+		criSocket, _, _ = unstructured.NestedString(data, "cri")
+		server.SealosHub, _, _ = unstructured.NestedString(data, "address")
+		force, _, _ = unstructured.NestedBool(data, "force")
+		server.Debug, _, _ = unstructured.NestedBool(data, "debug")
+		imageDir, _, _ := unstructured.NestedString(data, "image")
+		var imageList []string
+		if imageDir != "" && utils.IsExist(imageDir) {
+			paths, err := utils.GetFiles(imageDir)
+
+			if err != nil {
+				return errors.Wrap(err, "load image list files error")
+			}
+			for _, p := range paths {
+				images, err := utils.ReadLines(p)
+				if err != nil {
+					return errors.Wrap(err, "load image list error")
+				}
+				imageList = append(imageList, images...)
+			}
+		}
+		imageList = utils.RemoveDuplicate(imageList)
+		server.ShimImages = imageList
+		if shimSocket == "" {
+			shimSocket = server.SealosShimSock
+		}
+
 		if server.SealosHub == "" {
 			klog.Warning("registry addr is empty")
 		}
@@ -83,14 +123,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVar(&shimSocket, "shim-socket", server.SealosShimSock, "The endpoint of local image socket path.")
-	rootCmd.Flags().StringVar(&criSocket, "cri-socket", "", "The endpoint of remote image socket path.")
-	rootCmd.Flags().StringVar(&server.SealosHub, "registry-address", "", "The registry address.")
-	rootCmd.Flags().StringSliceVar(&server.IgnoreHub, "ignore-registry-address", server.IgnoreHub, "The ignore registry address.")
-
-	rootCmd.Flags().BoolVar(&force, "force", false, "is force.")
-	rootCmd.Flags().BoolVar(&server.Debug, "debug", server.Debug, "output debug log")
-
+	rootCmd.Flags().StringVarP(&configFile, "file", "f", "", "config file top image shim")
 }
 
 func run(socket string, criSocket string) {
