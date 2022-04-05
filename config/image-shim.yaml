@@ -1,5 +1,5 @@
 shim: /var/run/image-cri-shim.sock
-cri:
+cri: /run/containerd/containerd.sock
 address: sealos.hub:5000
 force: true
 debug: false
