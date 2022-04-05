@@ -30,19 +30,38 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 var shimSocket, criSocket string
 var force bool
 var configFile string
 
-type Config struct {
-	Shim    string
-	CRI     string
-	Address string
-	Images  []string
-	Force   bool
-	Debug   bool
+func syncImages() {
+	data, err := utils.Unmarshal(configFile)
+	if err != nil {
+		klog.Warning("load config from image shim: %v", err)
+		return
+	}
+	imageDir, _, _ := unstructured.NestedString(data, "image")
+	sync, _, _ := unstructured.NestedInt64(data, "sync")
+	if sync == 0 {
+		sync = 10 //default 10s
+	}
+	t := time.NewTicker(time.Duration(sync * int64(time.Second))) //every 10min check heartbeat
+	defer t.Stop()
+	for {
+		select {
+		case <-t.C:
+			//do sth
+			imageList, err := utils.LoadImages(imageDir)
+			if err != nil {
+				klog.Warning("load images from image dir: %v", err)
+			}
+			server.ShimImages = imageList
+			klog.Infof("sync image list for image dir,sync second is %d,data is %+v", sync, imageList)
+		}
+	}
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -53,6 +72,7 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	Version: version.Get(),
 	Run: func(cmd *cobra.Command, args []string) {
+		go syncImages()
 		run(shimSocket, criSocket)
 	},
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -66,22 +86,10 @@ var rootCmd = &cobra.Command{
 		force, _, _ = unstructured.NestedBool(data, "force")
 		server.Debug, _, _ = unstructured.NestedBool(data, "debug")
 		imageDir, _, _ := unstructured.NestedString(data, "image")
-		var imageList []string
-		if imageDir != "" && utils.IsExist(imageDir) {
-			paths, err := utils.GetFiles(imageDir)
-
-			if err != nil {
-				return errors.Wrap(err, "load image list files error")
-			}
-			for _, p := range paths {
-				images, err := utils.ReadLines(p)
-				if err != nil {
-					return errors.Wrap(err, "load image list error")
-				}
-				imageList = append(imageList, images...)
-			}
+		imageList, err := utils.LoadImages(imageDir)
+		if err != nil {
+			return err
 		}
-		imageList = utils.RemoveDuplicate(imageList)
 		server.ShimImages = imageList
 		if shimSocket == "" {
 			shimSocket = server.SealosShimSock
