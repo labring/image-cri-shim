@@ -16,13 +16,16 @@ limitations under the License.
 
 package utils
 
-import "github.com/pkg/errors"
+import (
+	"github.com/pkg/errors"
+	"k8s.io/klog/v2"
+)
 
 func LoadImages(imageDir string) ([]string, error) {
 	var imageList []string
 	if imageDir != "" && IsExist(imageDir) {
 		paths, err := GetFiles(imageDir)
-
+		klog.Infof("get files path is %v", paths)
 		if err != nil {
 			return nil, errors.Wrap(err, "load image list files error")
 		}

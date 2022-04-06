@@ -30,39 +30,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 var shimSocket, criSocket string
 var force bool
-var configFile string
-
-func syncImages() {
-	data, err := utils.Unmarshal(configFile)
-	if err != nil {
-		klog.Warning("load config from image shim: %v", err)
-		return
-	}
-	imageDir, _, _ := unstructured.NestedString(data, "image")
-	sync, _, _ := unstructured.NestedInt64(data, "sync")
-	if sync == 0 {
-		sync = 10 //default 10s
-	}
-	t := time.NewTicker(time.Duration(sync * int64(time.Second))) //every 10min check heartbeat
-	defer t.Stop()
-	for {
-		select {
-		case <-t.C:
-			//do sth
-			imageList, err := utils.LoadImages(imageDir)
-			if err != nil {
-				klog.Warning("load images from image dir: %v", err)
-			}
-			server.ShimImages = imageList
-			klog.Infof("sync image list for image dir,sync second is %d,data is %+v", sync, imageList)
-		}
-	}
-}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -72,25 +43,27 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	Version: version.Get(),
 	Run: func(cmd *cobra.Command, args []string) {
-		go syncImages()
+
 		run(shimSocket, criSocket)
 	},
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		data, err := utils.Unmarshal(configFile)
+		data, err := utils.Unmarshal(server.ConfigFile)
 		if err != nil {
 			return errors.Wrap(err, "image shim config load error")
 		}
 		shimSocket, _, _ = unstructured.NestedString(data, "shim")
+		klog.Infof("shim-socket: %s", shimSocket)
 		criSocket, _, _ = unstructured.NestedString(data, "cri")
+		klog.Infof("cri-socket: %s", criSocket)
 		server.SealosHub, _, _ = unstructured.NestedString(data, "address")
+		klog.Infof("hub-address: %s", server.SealosHub)
 		force, _, _ = unstructured.NestedBool(data, "force")
+		klog.Infof("force: %v", force)
 		server.Debug, _, _ = unstructured.NestedBool(data, "debug")
+		klog.Infof("debug: %v", server.Debug)
 		imageDir, _, _ := unstructured.NestedString(data, "image")
-		imageList, err := utils.LoadImages(imageDir)
-		if err != nil {
-			return err
-		}
-		server.ShimImages = imageList
+		klog.Infof("image-dir: %v", imageDir)
+		server.RunLoad()
 		if shimSocket == "" {
 			shimSocket = server.SealosShimSock
 		}
@@ -131,7 +104,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&configFile, "file", "f", "", "config file top image shim")
+	rootCmd.Flags().StringVarP(&server.ConfigFile, "file", "f", "", "config file top image shim")
 }
 
 func run(socket string, criSocket string) {

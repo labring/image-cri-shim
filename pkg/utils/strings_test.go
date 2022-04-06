@@ -21,7 +21,7 @@ import (
 )
 
 func TestGetFiles(t *testing.T) {
-	files, err := GetFiles("/Users/cuisongliu/Workspaces/go/src/github.com/sealyun-market/sealos-cri-shim/pkg/utils")
+	files, err := GetFiles("/Users/cuisongliu/Workspaces/go/src/github.com/sealyun-market/sealos-cri-shim/config/images")
 	if err != nil {
 		t.Error(err)
 	} else {
