@@ -5,6 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
+	"strings"
 	"time"
 )
 
@@ -19,13 +20,25 @@ var SealosHub = ""
 var ShimImages []string
 var Debug = false
 var ConfigFile string
+var Auth string
 
-func RunLoad() {
+func getData() map[string]interface{} {
 	data, err := utils.Unmarshal(ConfigFile)
 	if err != nil {
 		klog.Warning("load config from image shim: %v", err)
-		return
+		return nil
 	}
+	return data
+}
+
+func getRegistrDomain() string {
+	SealosHub = strings.ReplaceAll(SealosHub, "http://", "")
+	SealosHub = strings.ReplaceAll(SealosHub, "https://", "")
+	return SealosHub
+}
+
+func RunLoad() {
+	data := getData()
 	imageDir, _, _ := unstructured.NestedString(data, "image")
 	sync, _, _ := unstructured.NestedInt64(data, "sync")
 	if sync == 0 {
@@ -39,4 +52,5 @@ func RunLoad() {
 		ShimImages = images
 		klog.Infof("sync image list for image dir,sync second is %d,data is %+v", sync, images)
 	}, time.Duration(sync*int64(time.Second)))
+
 }

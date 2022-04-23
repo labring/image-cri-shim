@@ -63,7 +63,12 @@ var rootCmd = &cobra.Command{
 		klog.Infof("debug: %v", server.Debug)
 		imageDir, _, _ := unstructured.NestedString(data, "image")
 		klog.Infof("image-dir: %v", imageDir)
-		server.RunLoad()
+		server.Auth, _, _ = unstructured.NestedString(data, "auth")
+		klog.Infof("auth: %v", server.Auth)
+
+		if imageDir != "" {
+			server.RunLoad()
+		}
 		if shimSocket == "" {
 			shimSocket = server.SealosShimSock
 		}

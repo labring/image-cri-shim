@@ -17,15 +17,23 @@ limitations under the License.
 package utils
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 )
 
-func TestGetFiles(t *testing.T) {
-	files, err := GetFiles("/Users/cuisongliu/Workspaces/go/src/github.com/sealyun/image-cri-shim/config/aa/testimages")
-	if err != nil {
-		t.Error(err)
-	} else {
-		t.Logf("%+v", files)
+func TestHTTP(t *testing.T) {
+	//192.168.5.58:5000
+	prefix := "http://192.168.5.58:5000"
+	//byte[] authEncBytes = Base64.encodeBase64(authString.getBytes("utf-8"));
+	type RegistryData struct {
+		Name string
+		Tags []string
 	}
-
+	var registry RegistryData
+	data, _ := HTTP(fmt.Sprintf("%s/v2/sealyun/lvscare/tags/list", prefix), map[string]string{"Authorization": "Basic YWRtaW46cGFzc3cwcmQ="})
+	if data != "" {
+		json.Unmarshal([]byte(data), &registry)
+		t.Log(data)
+	}
 }
