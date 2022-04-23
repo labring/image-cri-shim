@@ -87,7 +87,11 @@ func (s *server) replaceImage(image, action string) string {
 	domain, named := splitDockerDomain(image)
 	if len(ShimImages) == 0 || (len(ShimImages) != 0 && utils.NotIn(image, ShimImages)) {
 		if utils.RegistryHasImage(SealosHub, Base64Auth, named) {
-			return getRegistrDomain() + "/" + named
+			newImage := getRegistrDomain() + "/" + named
+			if Debug {
+				klog.Infof("begin image: %s ,after image: %s , action: %s", image, newImage, action)
+			}
+			return newImage
 		}
 		klog.Infof("skip replace images %s", image)
 		return image
