@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/sealyun-market/image-cri-shim/pkg/cri"
@@ -64,7 +65,11 @@ var rootCmd = &cobra.Command{
 		imageDir, _, _ := unstructured.NestedString(data, "image")
 		klog.Infof("image-dir: %v", imageDir)
 		server.Auth, _, _ = unstructured.NestedString(data, "auth")
-		klog.Infof("auth: %v", server.Auth)
+		if server.Auth != "" {
+			klog.Infof("auth: %v", server.Auth)
+			server.Base64Auth = base64.StdEncoding.EncodeToString([]byte(server.Auth))
+			klog.Infof("base64 auth: %v", server.Base64Auth)
+		}
 
 		if imageDir != "" {
 			server.RunLoad()

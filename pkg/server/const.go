@@ -16,11 +16,14 @@ const (
 	DirPermissions = 0711
 )
 
-var SealosHub = ""
 var ShimImages []string
 var Debug = false
-var ConfigFile string
-var Auth string
+var (
+	Base64Auth string
+	Auth       string
+	ConfigFile string
+	SealosHub  string
+)
 
 func getData() map[string]interface{} {
 	data, err := utils.Unmarshal(ConfigFile)
