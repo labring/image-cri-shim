@@ -57,6 +57,9 @@ func (s *server) PullImage(ctx context.Context,
 
 func (s *server) RemoveImage(ctx context.Context,
 	req *api.RemoveImageRequest) (*api.RemoveImageResponse, error) {
+	if req.Image != nil {
+		req.Image.Image = s.replaceImage(req.Image.Image, "RemoveImage")
+	}
 	rsp, err := (*s.imageService).RemoveImage(ctx, req)
 
 	if err != nil {
@@ -84,13 +87,18 @@ func (s *server) replaceImage(image, action string) string {
 	// note:
 	// but kubelet sometimes will invoke imageService.RemoveImage() or something else. The req.Image.Image will the original name.
 	// so we'd better tag "sealer.hub/library/nginx:1.1.1" with original name "req.Image.Image" After "rsp, err := (*s.imageService).PullImage(ctx, req)".
+	//for image id
+	i := strings.IndexRune(image, '/')
+	if i == -1 {
+		return image
+	}
+	//for image name
 	domain, named := splitDockerDomain(image)
+	klog.Infof("domain: %s,named: %s,action: %s", domain, named, action)
 	if len(ShimImages) == 0 || (len(ShimImages) != 0 && utils.NotIn(image, ShimImages)) {
 		if utils.RegistryHasImage(SealosHub, Base64Auth, named) {
 			newImage := getRegistrDomain() + "/" + named
-			if Debug {
-				klog.Infof("begin image: %s ,after image: %s , action: %s", image, newImage, action)
-			}
+			klog.Infof("begin image: %s ,after image: %s", image, newImage, action)
 			return newImage
 		}
 		klog.Infof("skip replace images %s", image)

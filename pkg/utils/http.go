@@ -59,8 +59,10 @@ func RegistryHasImage(registryAddress, registryBase64Auth, imageName string) boo
 		Tags []string
 	}
 	var registry RegistryData
+	klog.Infof("address: %s,base64: %s,imageName: %s", registryAddress, registryBase64Auth, imageName)
 	data, _ := HTTP(fmt.Sprintf("%s/v2/%s/tags/list", registryAddress, imageName), map[string]string{"Authorization": "Basic " + registryBase64Auth})
 	if data != "" {
+		klog.Infof("data: %s", data)
 		err := json.Unmarshal([]byte(data), &registry)
 		if err != nil {
 			klog.Warning("convert registry data error")

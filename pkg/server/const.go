@@ -35,25 +35,24 @@ func getData() map[string]interface{} {
 }
 
 func getRegistrDomain() string {
-	SealosHub = strings.ReplaceAll(SealosHub, "http://", "")
-	SealosHub = strings.ReplaceAll(SealosHub, "https://", "")
-	return SealosHub
+	domain := SealosHub
+	domain = strings.ReplaceAll(domain, "http://", "")
+	domain = strings.ReplaceAll(domain, "https://", "")
+	return domain
 }
 
 func RunLoad() {
 	data := getData()
 	imageDir, _, _ := unstructured.NestedString(data, "image")
 	sync, _, _ := unstructured.NestedInt64(data, "sync")
-	if sync == 0 {
-		sync = 10 //default 10s
+	if sync != 0 {
+		go wait.Forever(func() {
+			images, err := utils.LoadImages(imageDir)
+			if err != nil {
+				klog.Warning("load images from image dir: %v", err)
+			}
+			ShimImages = images
+			klog.Infof("sync image list for image dir,sync second is %d,data is %+v", sync, images)
+		}, time.Duration(sync*int64(time.Second)))
 	}
-	go wait.Forever(func() {
-		images, err := utils.LoadImages(imageDir)
-		if err != nil {
-			klog.Warning("load images from image dir: %v", err)
-		}
-		ShimImages = images
-		klog.Infof("sync image list for image dir,sync second is %d,data is %+v", sync, images)
-	}, time.Duration(sync*int64(time.Second)))
-
 }
