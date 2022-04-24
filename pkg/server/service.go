@@ -88,8 +88,13 @@ func (s *server) replaceImage(image, action string) string {
 	// but kubelet sometimes will invoke imageService.RemoveImage() or something else. The req.Image.Image will the original name.
 	// so we'd better tag "sealer.hub/library/nginx:1.1.1" with original name "req.Image.Image" After "rsp, err := (*s.imageService).PullImage(ctx, req)".
 	//for image id
-	i := strings.IndexRune(image, '/')
-	if i == -1 {
+	images, err := utils.RunBashCmd("crictl images -q")
+	if err != nil {
+		klog.Warning("exec crictl images -q error: %s", err.Error())
+		return image
+	}
+	if utils.IsImageId(images, image) {
+		klog.Infof("image: %s is imageID,skip replace")
 		return image
 	}
 	//for image name

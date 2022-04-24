@@ -17,8 +17,12 @@ limitations under the License.
 package utils
 
 import (
+	"fmt"
+	"github.com/containers/image/v5/docker/reference"
 	"github.com/pkg/errors"
 	"k8s.io/klog/v2"
+	"os/exec"
+	"strings"
 )
 
 func LoadImages(imageDir string) ([]string, error) {
@@ -39,4 +43,113 @@ func LoadImages(imageDir string) ([]string, error) {
 	}
 	imageList = RemoveDuplicate(imageList)
 	return imageList, nil
+}
+
+func RunBashCmd(cmd string) (string, error) {
+	klog.V(8).Infof("cmd for bash in host: %s", cmd)
+	result, err := exec.Command("/bin/bash", "-c", cmd).CombinedOutput() // #nosec
+	return string(result), err
+}
+
+//crictl images -q
+func IsImageId(out, imageId string) bool {
+	imageIDs := strings.Split(out, "\n")
+	for _, v := range imageIDs {
+		if strings.Contains(v, fmt.Sprintf("sha256:%s", imageId)) {
+			return true
+		}
+	}
+	return false
+}
+
+func NormalizeName(name string) (reference.Named, error) {
+	// NOTE: this code is in symmetrie with containers/image/pkg/shortnames.
+	ref, err := reference.Parse(name)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error normalizing name %q", name)
+	}
+
+	named, ok := ref.(reference.Named)
+	if !ok {
+		return nil, errors.Errorf("%q is not a named reference", name)
+	}
+
+	// Enforce "localhost" if needed.
+	registry := reference.Domain(named)
+	if !(strings.ContainsAny(registry, ".:") || registry == "localhost") {
+		name = toLocalImageName(ref.String())
+	}
+
+	// Another parse which also makes sure that docker.io references are
+	// correctly normalized (e.g., docker.io/alpine to
+	// docker.io/library/alpine).
+	named, err = reference.ParseNormalizedNamed(name)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, hasTag := named.(reference.NamedTagged); hasTag {
+		// Strip off the tag of a tagged and digested reference.
+		named, err = normalizeTaggedDigestedNamed(named)
+		if err != nil {
+			return nil, err
+		}
+		return named, nil
+	}
+	if _, hasDigest := named.(reference.Digested); hasDigest {
+		return named, nil
+	}
+
+	// Make sure to tag "latest".
+	return reference.TagNameOnly(named), nil
+}
+
+// normalizeTaggedDigestedString strips the tag off the specified string iff it
+// is tagged and digested. Note that the tag is entirely ignored to match
+// Docker behavior.
+func normalizeTaggedDigestedString(s string) (string, error) {
+	// Note that the input string is not expected to be parseable, so we
+	// return it verbatim in error cases.
+	ref, err := reference.Parse(s)
+	if err != nil {
+		return "", err
+	}
+	named, ok := ref.(reference.Named)
+	if !ok {
+		return s, nil
+	}
+	named, err = normalizeTaggedDigestedNamed(named)
+	if err != nil {
+		return "", err
+	}
+	return named.String(), nil
+}
+
+// normalizeTaggedDigestedNamed strips the tag off the specified named
+// reference iff it is tagged and digested. Note that the tag is entirely
+// ignored to match Docker behavior.
+func normalizeTaggedDigestedNamed(named reference.Named) (reference.Named, error) {
+	_, isTagged := named.(reference.NamedTagged)
+	if !isTagged {
+		return named, nil
+	}
+	digested, isDigested := named.(reference.Digested)
+	if !isDigested {
+		return named, nil
+	}
+
+	// Now strip off the tag.
+	newNamed := reference.TrimNamed(named)
+	// And re-add the digest.
+	newNamed, err := reference.WithDigest(newNamed, digested.Digest())
+	if err != nil {
+		return named, err
+	}
+	klog.V(8).Infof("Stripped off tag from tagged and digested reference %q", named.String())
+	return newNamed, nil
+}
+
+// prefix the specified name with "localhost/".
+func toLocalImageName(name string) string {
+	return "localhost/" + strings.TrimLeft(name, "/")
 }
