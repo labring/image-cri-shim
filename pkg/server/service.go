@@ -94,7 +94,7 @@ func (s *server) replaceImage(image, action string) string {
 		return image
 	}
 	if utils.IsImageId(images, image) {
-		klog.Infof("image: %s is imageID,skip replace")
+		klog.Infof("image: %s is imageID,skip replace", image)
 		return image
 	}
 	//for image name
