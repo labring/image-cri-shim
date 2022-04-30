@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/sealyun-market/image-cri-shim/cmd"
+import "github.com/labring/image-cri-shim/cmd"
 
 func main() {
 	cmd.Execute()

@@ -14,9 +14,9 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -X github.com/sealyun-market/image-cri-shim/pkg/version.gitVersion={{.Version}}
-      - -X github.com/sealyun-market/image-cri-shim/pkg/version.gitCommit={{.ShortCommit}}
-      - -X github.com/sealyun-market/image-cri-shim/pkg/version.buildDate={{.Date}}
+      - -X github.com/labring/image-cri-shim/pkg/version.gitVersion={{.Version}}
+      - -X github.com/labring/image-cri-shim/pkg/version.gitCommit={{.ShortCommit}}
+      - -X github.com/labring/image-cri-shim/pkg/version.buildDate={{.Date}}
       - -s -w
 archives:
   - id: default

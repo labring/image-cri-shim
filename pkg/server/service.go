@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"github.com/sealyun-market/image-cri-shim/pkg/utils"
+	"github.com/labring/image-cri-shim/pkg/utils"
 	api "k8s.io/cri-api/pkg/apis/runtime/v1alpha2"
 	"k8s.io/klog/v2"
 	"strings"

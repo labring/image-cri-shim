@@ -1,4 +1,4 @@
-module github.com/sealyun-market/image-cri-shim
+module github.com/labring/image-cri-shim
 
 go 1.16
 

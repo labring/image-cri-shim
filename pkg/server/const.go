@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/sealyun-market/image-cri-shim/pkg/utils"
+	"github.com/labring/image-cri-shim/pkg/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"

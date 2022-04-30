@@ -16,7 +16,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/sealyun-market/image-cri-shim/pkg/utils"
+	"github.com/labring/image-cri-shim/pkg/utils"
 	"net"
 	"os"
 	"syscall"
