@@ -11,7 +11,6 @@ if kubelet is stop,but dockershim.sock is zombie sock. so proxy is panic.
 rm -rf /var/run/dockershim.sock
 ```
 
-
 ```
 [Unit]
 Description=kubelet: The Kubernetes Node Agent

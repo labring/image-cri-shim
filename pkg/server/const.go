@@ -1,12 +1,27 @@
+// Copyright © 2022 sealos.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package server
 
 import (
-	"github.com/labring/image-cri-shim/pkg/utils"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/klog/v2"
 	"strings"
 	"time"
+
+	"github.com/labring/image-cri-shim/pkg/utils"
+	"github.com/labring/sealos/pkg/utils/logger"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 const (
@@ -28,7 +43,7 @@ var (
 func getData() map[string]interface{} {
 	data, err := utils.Unmarshal(ConfigFile)
 	if err != nil {
-		klog.Warning("load config from image shim: %v", err)
+		logger.Warn("load config from image shim: %v", err)
 		return nil
 	}
 	return data
@@ -49,10 +64,10 @@ func RunLoad() {
 		go wait.Forever(func() {
 			images, err := utils.LoadImages(imageDir)
 			if err != nil {
-				klog.Warning("load images from image dir: %v", err)
+				logger.Warn("load images from image dir: %v", err)
 			}
 			ShimImages = images
-			klog.Infof("sync image list for image dir,sync second is %d,data is %+v", sync, images)
+			logger.Info("sync image list for image dir,sync second is %d,data is %+v", sync, images)
 		}, time.Duration(sync*int64(time.Second)))
 	}
 }

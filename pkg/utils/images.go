@@ -18,18 +18,19 @@ package utils
 
 import (
 	"fmt"
-	"github.com/containers/image/v5/docker/reference"
-	"github.com/pkg/errors"
-	"k8s.io/klog/v2"
 	"os/exec"
 	"strings"
+
+	"github.com/containers/image/v5/docker/reference"
+	"github.com/labring/sealos/pkg/utils/logger"
+	"github.com/pkg/errors"
 )
 
 func LoadImages(imageDir string) ([]string, error) {
 	var imageList []string
 	if imageDir != "" && IsExist(imageDir) {
 		paths, err := GetFiles(imageDir)
-		klog.Infof("get files path is %v", paths)
+		logger.Info("get files path is %v", paths)
 		if err != nil {
 			return nil, errors.Wrap(err, "load image list files error")
 		}
@@ -46,16 +47,16 @@ func LoadImages(imageDir string) ([]string, error) {
 }
 
 func RunBashCmd(cmd string) (string, error) {
-	klog.V(8).Infof("cmd for bash in host: %s", cmd)
+	logger.Info("cmd for bash in host: %s", cmd)
 	result, err := exec.Command("/bin/bash", "-c", cmd).CombinedOutput() // #nosec
 	return string(result), err
 }
 
 //crictl images -q
-func IsImageId(out, imageId string) bool {
+func IsImageID(out, imageID string) bool {
 	imageIDs := strings.Split(out, "\n")
 	for _, v := range imageIDs {
-		if strings.Contains(v, fmt.Sprintf("sha256:%s", imageId)) {
+		if strings.Contains(v, fmt.Sprintf("sha256:%s", imageID)) {
 			return true
 		}
 	}
@@ -104,27 +105,6 @@ func NormalizeName(name string) (reference.Named, error) {
 	return reference.TagNameOnly(named), nil
 }
 
-// normalizeTaggedDigestedString strips the tag off the specified string iff it
-// is tagged and digested. Note that the tag is entirely ignored to match
-// Docker behavior.
-func normalizeTaggedDigestedString(s string) (string, error) {
-	// Note that the input string is not expected to be parseable, so we
-	// return it verbatim in error cases.
-	ref, err := reference.Parse(s)
-	if err != nil {
-		return "", err
-	}
-	named, ok := ref.(reference.Named)
-	if !ok {
-		return s, nil
-	}
-	named, err = normalizeTaggedDigestedNamed(named)
-	if err != nil {
-		return "", err
-	}
-	return named.String(), nil
-}
-
 // normalizeTaggedDigestedNamed strips the tag off the specified named
 // reference iff it is tagged and digested. Note that the tag is entirely
 // ignored to match Docker behavior.
@@ -145,7 +125,7 @@ func normalizeTaggedDigestedNamed(named reference.Named) (reference.Named, error
 	if err != nil {
 		return named, err
 	}
-	klog.V(8).Infof("Stripped off tag from tagged and digested reference %q", named.String())
+	logger.Info("Stripped off tag from tagged and digested reference %q", named.String())
 	return newNamed, nil
 }
 

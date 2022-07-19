@@ -1,5 +1,5 @@
 /*
-Copyright 2022 cuisongliu@qq.com.
+Copyright 2018 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,18 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package utils
+package cri
 
 import (
+	"fmt"
 	"testing"
 )
 
-func TestGetFiles(t *testing.T) {
-	files, err := GetFiles("/Users/cuisongliu/Workspaces/go/src/github.com/sealyun/image-cri-shim/config/aa/testimages")
-	if err != nil {
-		t.Error(err)
-	} else {
-		t.Logf("%+v", files)
-	}
-
+func TestNewContainerRuntime(t *testing.T) {
+	//cr:=&ContainerdRuntime{config: "/Users/cuisongliu/Workspaces/go/src/github.com/sealyun/cloud-kernel/runtime/containerd/etc/config.toml"}
+	//driver,_:=cr.processConfigFile()
+	//t.Log(driver)
+	cc := []string{"aa", "bb", "cc"}
+	println(fmt.Sprintf("%+v", cc))
 }

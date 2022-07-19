@@ -1,8 +1,0 @@
-shim: /var/run/image-cri-shim.sock
-cri: /run/containerd/containerd.sock
-address: http://sealos.hub:5000
-force: true
-debug: false
-image: /Users/cuisongliu/Workspaces/go/src/github.com/sealyun-market/sealos-cri-shim/config/images
-sync: 10
-auth: admin:passw0rd
