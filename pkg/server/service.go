@@ -1,23 +1,36 @@
+// Copyright © 2022 sealos.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package server
 
 import (
 	"context"
-	"github.com/labring/image-cri-shim/pkg/utils"
-	api "k8s.io/cri-api/pkg/apis/runtime/v1alpha2"
-	"k8s.io/klog/v2"
 	"strings"
+
+	"github.com/labring/image-cri-shim/pkg/utils"
+	"github.com/labring/sealos/pkg/utils/logger"
+	api "k8s.io/cri-api/pkg/apis/runtime/v1alpha2"
 )
 
 const (
 	legacyDefaultDomain = "index.docker.io"
 	defaultDomain       = "docker.io"
 	officialRepoName    = "library"
-	defaultTag          = "latest"
 )
 
 func (s *server) ListImages(ctx context.Context,
 	req *api.ListImagesRequest) (*api.ListImagesResponse, error) {
-
 	rsp, err := (*s.imageService).ListImages(ctx, req)
 
 	if err != nil {
@@ -90,23 +103,23 @@ func (s *server) replaceImage(image, action string) string {
 	//for image id
 	images, err := utils.RunBashCmd("crictl images -q")
 	if err != nil {
-		klog.Warning("exec crictl images -q error: %s", err.Error())
+		logger.Warn("exec crictl images -q error: %s", err.Error())
 		return image
 	}
-	if utils.IsImageId(images, image) {
-		klog.Infof("image: %s is imageID,skip replace", image)
+	if utils.IsImageID(images, image) {
+		logger.Info("image: %s is imageID,skip replace", image)
 		return image
 	}
 	//for image name
 	domain, named := splitDockerDomain(image)
-	klog.Infof("domain: %s,named: %s,action: %s", domain, named, action)
+	logger.Info("domain: %s,named: %s,action: %s", domain, named, action)
 	if len(ShimImages) == 0 || (len(ShimImages) != 0 && utils.NotIn(image, ShimImages)) {
 		if utils.RegistryHasImage(SealosHub, Base64Auth, named) {
 			newImage := getRegistrDomain() + "/" + named
-			klog.Infof("begin image: %s ,after image: %s", image, newImage, action)
+			logger.Info("begin image: %s ,after image: %s", image, newImage)
 			return newImage
 		}
-		klog.Infof("skip replace images %s", image)
+		logger.Info("skip replace images %s", image)
 		return image
 	}
 
@@ -118,7 +131,7 @@ func (s *server) replaceImage(image, action string) string {
 	}
 
 	if Debug {
-		klog.Infof("begin image: %s ,after image: %s , action: %s", image, fixImageName, action)
+		logger.Info("begin image: %s ,after image: %s , action: %s", image, fixImageName, action)
 	}
 	return fixImageName
 }

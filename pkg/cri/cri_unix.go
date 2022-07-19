@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 /*
@@ -19,15 +20,19 @@ limitations under the License.
 package cri
 
 import (
-	"github.com/pkg/errors"
 	"os"
-	"strings"
 )
 
 const (
-	dockerSocket               = "/var/run/docker.sock" // The Docker socket is not CRI compatible
-	containerdSocket           = "/run/containerd/containerd.sock"
-	DefaultDockerCRISocket     = "/var/run/dockershim.sock"
+	// CRISocketContainerd is the containerd CRI endpoint
+	CRISocketContainerd = "unix:///var/run/containerd/containerd.sock"
+	// CRISocketCRIO is the cri-o CRI endpoint
+	CRISocketCRIO = "unix:///var/run/crio/crio.sock"
+	// CRISocketDocker is the cri-dockerd CRI endpoint
+	CRISocketDocker = "unix:///var/run/cri-dockerd.sock"
+
+	// DefaultCRISocket defines the default CRI socket
+	DefaultCRISocket = CRISocketContainerd
 )
 
 // isExistingSocket checks if path exists and is domain socket
@@ -38,45 +43,4 @@ func isExistingSocket(path string) bool {
 	}
 
 	return fileInfo.Mode()&os.ModeSocket != 0
-}
-
-// detectCRISocketImpl is separated out only for test purposes, DON'T call it directly, use DetectCRISocket instead
-func detectCRISocketImpl(isSocket func(string) bool) (string, error) {
-	foundCRISockets := []string{}
-	knownCRISockets := []string{
-		// Docker and containerd sockets are special cased below, hence not to be included here
-		"/var/run/crio/crio.sock",
-	}
-
-	if isSocket(dockerSocket) {
-		// the path in dockerSocket is not CRI compatible, hence we should replace it with a CRI compatible socket
-		foundCRISockets = append(foundCRISockets, DefaultDockerCRISocket)
-	} else if isSocket(containerdSocket) {
-		// Docker 18.09 gets bundled together with containerd, thus having both dockerSocket and containerdSocket present.
-		// For compatibility reasons, we use the containerd socket only if Docker is not detected.
-		foundCRISockets = append(foundCRISockets, containerdSocket)
-	}
-
-	for _, socket := range knownCRISockets {
-		if isSocket(socket) {
-			foundCRISockets = append(foundCRISockets, socket)
-		}
-	}
-
-	switch len(foundCRISockets) {
-	case 0:
-		// Fall back to Docker if no CRI is detected, we can error out later on if we need it
-		return DefaultDockerCRISocket, nil
-	case 1:
-		// Precisely one CRI found, use that
-		return foundCRISockets[0], nil
-	default:
-		// Multiple CRIs installed?
-		return "", errors.Errorf("Found multiple CRI sockets, please use --cri-socket to select one: %s", strings.Join(foundCRISockets, ", "))
-	}
-}
-
-// DetectCRISocket uses a list of known CRI sockets to detect one. If more than one or none is discovered, an error is returned.
-func DetectCRISocket() (string, error) {
-	return detectCRISocketImpl(isExistingSocket)
 }

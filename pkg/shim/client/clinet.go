@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//nolint:staticcheck
 package client
 
 import (
 	"fmt"
-	"github.com/labring/image-cri-shim/pkg/utils"
 	"net"
 	"os"
 	"syscall"
 	"time"
+
+	"github.com/labring/image-cri-shim/pkg/utils"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
