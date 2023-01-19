@@ -45,7 +45,7 @@ timeout: 15m
 
 ## Changelog
 - add grpc timeout in config json ,default `15m`
-- add cri version in config json , default `v1alpha2` suuport value `v1` and `v1alpha2`
+- add cri version in config json , default `v1alpha2` support value `v1` and `v1alpha2`
 - add grpc default message size is 16MB
 
 ## CRI support 
